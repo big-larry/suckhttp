@@ -10,32 +10,32 @@ import (
 )
 
 type Request struct {
-	Method     HttpMethod
-	URL        url.URL
-	Headers    []string
-	Body       []byte
-	Timeout    time.Duration
-	RemoteAddr net.Addr
+	method     HttpMethod
+	url        url.URL
+	headers    []string
+	body       []byte
+	timeout    time.Duration
+	remoteAddr net.Addr
 }
 
 func (request *Request) Send(ctx context.Context, conn net.Conn) (response *Response, err error) {
-	message, err := CreateRequestMessage(request.Method, request.URL.RequestURI(), request.Headers, request.Body)
+	message, err := CreateRequestMessage(request.method, request.url.RequestURI(), request.headers, request.body)
 	if err != nil {
 		return
 	}
 	// fmt.Println(string(message))
-	conn.SetDeadline(time.Now().Add(request.Timeout))
+	conn.SetDeadline(time.Now().Add(request.timeout))
 	_, err = conn.Write(message)
 	if err != nil {
 		return
 	}
 
-	response, err = ReadResponse(ctx, conn, request.Timeout)
+	response, err = ReadResponse(ctx, conn, request.timeout)
 	return
 }
 
 func ReadRequest(ctx context.Context, conn net.Conn, timeout time.Duration) (result *Request, err error) {
-	result = &Request{RemoteAddr: conn.RemoteAddr()}
+	result = &Request{remoteAddr: conn.RemoteAddr()}
 	head, headers, body, err := requestReader(ctx, conn, timeout)
 	if err != nil {
 		return
@@ -44,13 +44,13 @@ func ReadRequest(ctx context.Context, conn net.Conn, timeout time.Duration) (res
 	if len(s) < 3 {
 		return nil, fmt.Errorf("Error in request HEAD: %s", head)
 	}
-	result.Method = HttpMethod(s[0])
-	result.Headers = headers
+	result.method = HttpMethod(s[0])
+	result.headers = headers
 	u, err := url.Parse("https://" + result.GetHeader("host") + s[1])
 	if err == nil {
-		result.URL = *u
+		result.url = *u
 	}
-	result.Body = body
+	result.body = body
 	return
 }
 
@@ -59,56 +59,56 @@ func NewRequest(method HttpMethod, uri string) (*Request, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Request{Method: method, URL: *u, Timeout: time.Minute, Headers: []string{"host", u.Hostname()}}, nil
+	return &Request{method: method, url: *u, timeout: time.Minute, headers: []string{"host", u.Hostname()}}, nil
 }
 
 func (request *Request) AddHeader(key, value string) *Request {
-	if request.Headers == nil {
-		request.Headers = make([]string, 0)
+	if request.headers == nil {
+		request.headers = make([]string, 0)
 	}
-	request.Headers = append(request.Headers, []string{key, value}...)
+	request.headers = append(request.headers, []string{key, value}...)
 	return request
 }
 
 func (request *Request) SetHeader(key, value string) *Request {
-	if request.Headers == nil {
-		request.Headers = make([]string, 0)
+	if request.headers == nil {
+		request.headers = make([]string, 0)
 	}
-	for i := 0; i < len(request.Headers); i += 2 {
-		if request.Headers[i] == key {
-			request.Headers[i+1] = value
+	for i := 0; i < len(request.headers); i += 2 {
+		if request.headers[i] == key {
+			request.headers[i+1] = value
 			return request
 		}
 	}
-	request.Headers = append(request.Headers, []string{key, value}...)
+	request.headers = append(request.headers, []string{key, value}...)
 	return request
 }
 
 func (request *Request) DeleteHeader(key string) *Request {
-	if request.Headers == nil {
+	if request.headers == nil {
 		return request
 	}
 	headers := make([]string, 0)
-	for i := 0; i < len(request.Headers); i += 2 {
-		if request.Headers[i] != key {
-			headers = append(headers, []string{request.Headers[i], request.Headers[i+1]}...)
+	for i := 0; i < len(request.headers); i += 2 {
+		if request.headers[i] != key {
+			headers = append(headers, []string{request.headers[i], request.headers[i+1]}...)
 		}
 	}
-	request.Headers = headers
+	request.headers = headers
 	return request
 }
 
 func (request *Request) GetHeader(name string) string {
-	for i := 0; i < len(request.Headers); i += 2 {
-		if request.Headers[i] == name {
-			return request.Headers[i+1]
+	for i := 0; i < len(request.headers); i += 2 {
+		if request.headers[i] == name {
+			return request.headers[i+1]
 		}
 	}
 	return ""
 }
 
 func (request *Request) String() string {
-	message, err := CreateRequestMessage(request.Method, request.URL.RequestURI(), request.Headers, request.Body)
+	message, err := CreateRequestMessage(request.method, request.url.RequestURI(), request.headers, request.body)
 	if err != nil {
 		return ""
 	}
