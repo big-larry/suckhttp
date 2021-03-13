@@ -59,7 +59,11 @@ func NewRequest(method HttpMethod, uri string) (*Request, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Request{method: method, url: *u, timeout: time.Minute, headers: []string{"host", u.Hostname()}}, nil
+	headers := make([]string, 0, 2)
+	if u.Hostname() != "" {
+		headers = append(headers, []string{"host", u.Hostname()}...)
+	}
+	return &Request{method: method, url: *u, timeout: time.Minute, headers: headers}, nil
 }
 
 func (request *Request) AddHeader(key, value string) *Request {
