@@ -53,7 +53,6 @@ func ReadResponse(ctx context.Context, conn net.Conn, timeout time.Duration) (re
 	// } else if enc == "br" {
 	// 	body, err = unbr(body)
 	// } else if enc == "zstd" {
-	// 	// TODO
 	// }
 	response.DeleteHeader(Transfer_Encoding)
 	response.body = body

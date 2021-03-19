@@ -31,6 +31,7 @@ func (request *Request) Send(ctx context.Context, conn net.Conn) (response *Resp
 	}
 
 	response, err = ReadResponse(ctx, conn, request.timeout)
+	conn.SetDeadline(time.Time{})
 	return
 }
 
