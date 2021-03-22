@@ -13,13 +13,13 @@ type Request struct {
 	method     HttpMethod
 	Uri        url.URL
 	headers    []string
-	body       []byte
+	Body       []byte
 	timeout    time.Duration
 	remoteAddr net.Addr
 }
 
 func (request *Request) Send(ctx context.Context, conn net.Conn) (response *Response, err error) {
-	message, err := CreateRequestMessage(request.method, request.Uri.RequestURI(), request.headers, request.body)
+	message, err := CreateRequestMessage(request.method, request.Uri.RequestURI(), request.headers, request.Body)
 	if err != nil {
 		return
 	}
@@ -51,7 +51,7 @@ func ReadRequest(ctx context.Context, conn net.Conn, timeout time.Duration) (res
 	if err == nil {
 		result.Uri = *u
 	}
-	result.body = body
+	result.Body = body
 	return
 }
 
@@ -113,7 +113,7 @@ func (request *Request) GetHeader(name string) string {
 }
 
 func (request *Request) String() string {
-	message, err := CreateRequestMessage(request.method, request.Uri.RequestURI(), request.headers, request.body)
+	message, err := CreateRequestMessage(request.method, request.Uri.RequestURI(), request.headers, request.Body)
 	if err != nil {
 		return ""
 	}
