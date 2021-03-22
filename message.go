@@ -46,5 +46,5 @@ func CreateRequestMessage(method HttpMethod, location string, headers []string, 
 }
 
 func CreateResponseMessage(statusCode int, statusText string, headers []string, body []byte) (result []byte, err error) {
-	return createMessage(suckutils.ConcatFour("HTTP/1.1", strconv.Itoa(statusCode), " ", statusText), headers, body)
+	return createMessage(suckutils.ConcatFour("HTTP/1.1 ", strconv.Itoa(statusCode), " ", statusText), headers, body)
 }
