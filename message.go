@@ -3,7 +3,6 @@ package suckhttp
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/big-larry/suckutils"
@@ -43,9 +42,9 @@ func createMessage(head string, headers []string, body []byte) (result []byte, e
 }
 
 func CreateRequestMessage(method HttpMethod, location string, headers []string, body []byte) (result []byte, err error) {
-	return createMessage(fmt.Sprintf("%s %s HTTP/1.1", method, location), headers, body)
+	return createMessage(suckutils.ConcatFour(string(method), " ", location, " HTTP/1.1"), headers, body)
 }
 
 func CreateResponseMessage(statusCode int, statusText string, headers []string, body []byte) (result []byte, err error) {
-	return createMessage(fmt.Sprintf("HTTP/1.1 %d %s", statusCode, statusText), headers, body)
+	return createMessage(suckutils.ConcatFour("HTTP/1.1", strconv.Itoa(statusCode), " ", statusText), headers, body)
 }

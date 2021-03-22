@@ -11,7 +11,7 @@ import (
 
 type Request struct {
 	method     HttpMethod
-	url        url.URL
+	Uri        url.URL
 	headers    []string
 	body       []byte
 	timeout    time.Duration
@@ -19,7 +19,7 @@ type Request struct {
 }
 
 func (request *Request) Send(ctx context.Context, conn net.Conn) (response *Response, err error) {
-	message, err := CreateRequestMessage(request.method, request.url.RequestURI(), request.headers, request.body)
+	message, err := CreateRequestMessage(request.method, request.Uri.RequestURI(), request.headers, request.body)
 	if err != nil {
 		return
 	}
@@ -49,7 +49,7 @@ func ReadRequest(ctx context.Context, conn net.Conn, timeout time.Duration) (res
 	result.headers = headers
 	u, err := url.Parse("https://" + result.GetHeader("host") + s[1])
 	if err == nil {
-		result.url = *u
+		result.Uri = *u
 	}
 	result.body = body
 	return
@@ -64,7 +64,7 @@ func NewRequest(method HttpMethod, uri string) (*Request, error) {
 	if u.Hostname() != "" {
 		headers = append(headers, []string{"host", u.Hostname()}...)
 	}
-	return &Request{method: method, url: *u, timeout: time.Minute, headers: headers}, nil
+	return &Request{method: method, Uri: *u, timeout: time.Minute, headers: headers}, nil
 }
 
 func (request *Request) AddHeader(key, value string) *Request {
@@ -113,7 +113,7 @@ func (request *Request) GetHeader(name string) string {
 }
 
 func (request *Request) String() string {
-	message, err := CreateRequestMessage(request.method, request.url.RequestURI(), request.headers, request.body)
+	message, err := CreateRequestMessage(request.method, request.Uri.RequestURI(), request.headers, request.body)
 	if err != nil {
 		return ""
 	}
