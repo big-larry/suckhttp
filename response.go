@@ -129,3 +129,7 @@ func (response *Response) String() string {
 	}
 	return string(message)
 }
+
+func (response *Response) GetStatus() (int, string) {
+	return response.statusCode, response.statusText
+}

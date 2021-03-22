@@ -56,7 +56,7 @@ func listenWithClose() error {
 			return err
 		}
 		response := NewResponse(200, "OK")
-		response.SetBody([]byte(request.url.RequestURI()))
+		response.SetBody([]byte(request.Uri.RequestURI()))
 		err = response.Write(conn, time.Second)
 		if err != nil {
 			return err
@@ -89,7 +89,7 @@ func listenWithoutClose() error {
 					break
 				}
 				response := NewResponse(200, "OK")
-				response.SetBody([]byte(request.url.RequestURI()))
+				response.SetBody([]byte(request.Uri.RequestURI()))
 				err = response.Write(c, time.Second)
 				if err != nil {
 					fmt.Println("write", err)
