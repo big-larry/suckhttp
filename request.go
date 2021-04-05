@@ -112,6 +112,13 @@ func (request *Request) GetHeader(name string) string {
 	return ""
 }
 
+func (request *Request) GetRemoteAddr() string {
+	if a := request.GetHeader("x-real-ip"); a != "" {
+		return a
+	}
+	return request.remoteAddr.String()
+}
+
 func (request *Request) String() string {
 	message, err := CreateRequestMessage(request.method, request.Uri.RequestURI(), request.headers, request.Body)
 	if err != nil {
