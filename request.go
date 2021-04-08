@@ -2,6 +2,7 @@ package suckhttp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/url"
@@ -125,4 +126,22 @@ func (request *Request) String() string {
 		return ""
 	}
 	return string(message)
+}
+
+func (request *Request) Clone(newuri string) (*Request, error) {
+	if request == nil {
+		return nil, errors.New("Request is nil")
+	}
+	uri, err := url.Parse(newuri)
+	if err != nil {
+		return nil, err
+	}
+	result := &Request{
+		method:     request.method,
+		headers:    request.headers,
+		timeout:    request.timeout,
+		remoteAddr: request.remoteAddr,
+		Uri:        *uri,
+	}
+	return result, nil
 }
