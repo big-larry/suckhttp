@@ -128,7 +128,7 @@ func (request *Request) String() string {
 	return string(message)
 }
 
-func (request *Request) Clone(newuri string) (*Request, error) {
+func (request *Request) Clone(newuri string, timeout time.Duration) (*Request, error) {
 	if request == nil {
 		return nil, errors.New("Request is nil")
 	}
@@ -139,7 +139,7 @@ func (request *Request) Clone(newuri string) (*Request, error) {
 	result := &Request{
 		method:     request.method,
 		headers:    request.headers,
-		timeout:    request.timeout,
+		timeout:    timeout,
 		remoteAddr: request.remoteAddr,
 		Uri:        *uri,
 	}
