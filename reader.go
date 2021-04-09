@@ -32,6 +32,7 @@ func requestReader(ctx context.Context, conn net.Conn, timeout time.Duration) (h
 func read(ctx context.Context, conn net.Conn, timeout time.Duration, headersHandler func(name, value string)) ([]byte, error) {
 	reader := &httpReader{conn: conn}
 	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 	conn.SetReadDeadline(time.Now().Add(timeout))
 	var body *bytes.Buffer
 	contentLength := 0
@@ -138,7 +139,6 @@ loop:
 		}
 	}
 
-	cancel()
 	if body != nil {
 		return body.Bytes(), nil
 	}
