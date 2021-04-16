@@ -154,7 +154,7 @@ func (reader *httpReader) loadNext(count int) error {
 	if err != nil {
 		return err
 	}
-	reader.conn.SetReadDeadline(time.Now().Add(30 * time.Second))
+	// reader.conn.SetReadDeadline(time.Now().Add(30 * time.Second))
 	reader.data = append(reader.data, buf[:n]...)
 	return nil
 }
@@ -171,7 +171,7 @@ func (reader *httpReader) loadWhile(count int) error {
 		if err != nil && n != ost {
 			return err
 		}
-		reader.conn.SetReadDeadline(time.Now().Add(30 * time.Second))
+		//reader.conn.SetReadDeadline(time.Now().Add(30 * time.Second))
 		reader.data = append(reader.data, buf[shift:shift+n]...)
 		if n == ost {
 			break
