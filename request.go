@@ -17,6 +17,7 @@ type Request struct {
 	Body       []byte
 	timeout    time.Duration
 	remoteAddr net.Addr
+	Time       time.Duration
 }
 
 func (request *Request) Send(ctx context.Context, conn net.Conn) (response *Response, err error) {
@@ -42,6 +43,7 @@ func ReadRequest(ctx context.Context, conn net.Conn, timeout time.Duration) (res
 	if err != nil {
 		return
 	}
+	result.Time = time
 	s := strings.Split(head, " ")
 	if len(s) < 3 {
 		return nil, fmt.Errorf("Error in request HEAD: %s", head)

@@ -14,6 +14,7 @@ type Response struct {
 	statusText string
 	headers    []string
 	body       []byte
+	Time       time.Duration
 }
 
 func NewResponse(statusCode int, statusText string) *Response {
@@ -36,11 +37,11 @@ func (response *Response) Write(conn net.Conn, timeout time.Duration) error {
 }
 
 func ReadResponse(ctx context.Context, conn net.Conn, timeout time.Duration) (response *Response, err error) {
-	head, headers, body, err := requestReader(ctx, conn, timeout)
+	head, headers, body, time, err := requestReader(ctx, conn, timeout)
 	if err != nil {
 		return
 	}
-	response = &Response{}
+	response = &Response{Time: time}
 	s := strings.Split(head, " ")
 	response.statusCode, err = strconv.Atoi(s[1])
 	if len(s) > 2 {
