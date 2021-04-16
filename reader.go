@@ -14,13 +14,14 @@ import (
 type httpReader struct {
 	conn net.Conn
 	data []byte
+	time time.Duration
 }
 
-func requestReader(ctx context.Context, conn net.Conn, timeout time.Duration) (head string, headers []string, body []byte, err error) {
+func requestReader(ctx context.Context, conn net.Conn, timeout time.Duration) (string, []string, []byte, time.Duration, error) {
 	return read(ctx, conn, timeout)
 }
 
-func read(ctx context.Context, conn net.Conn, timeout time.Duration) (string, []string, []byte, error) {
+func read(ctx context.Context, conn net.Conn, timeout time.Duration) (string, []string, []byte, time.Duration, error) {
 	reader := &httpReader{conn: conn}
 	head := ""
 	headers := make([]string, 0, 50)
@@ -38,13 +39,13 @@ loop:
 	for {
 		select {
 		case <-ctx.Done():
-			return "", nil, nil, errors.New("Canceled")
+			return "", nil, nil, reader.time, errors.New("Canceled")
 		default:
 			line := reader.readLine()
 			if line == nil {
 				err = reader.loadNext(1024)
 				if err != nil {
-					return "", nil, nil, err
+					return "", nil, nil, reader.time, err
 				}
 				continue
 			}
@@ -90,7 +91,7 @@ loop:
 					// 	log.Println("EOF:", "Readed done", contentLength)
 					// }
 					if err != nil {
-						return "", nil, nil, err
+						return "", nil, nil, reader.time, err
 					}
 					body.Write(data)
 				} else if contentLength == -1 {
@@ -118,12 +119,12 @@ loop:
 						// headersHandler("content-length", strconv.Itoa(body.Len()))
 						break loop
 					} else if a == 0 && len(trailerHeaders) > 0 {
-						return "", nil, nil, errors.New("Not implemented trailer headers")
+						return "", nil, nil, reader.time, errors.New("Not implemented trailer headers")
 					}
 
 					data, err := reader.read(a + 2)
 					if err != nil {
-						return "", nil, nil, err
+						return "", nil, nil, reader.time, err
 					}
 					body.Write(data[:a])
 					continue
@@ -134,9 +135,16 @@ loop:
 	}
 
 	if body != nil {
-		return head, headers, body.Bytes(), nil
+		return head, headers, body.Bytes(), reader.time, nil
 	}
-	return head, headers, nil, nil
+	return head, headers, nil, reader.time, nil
+}
+
+func (reader *httpReader) readBuf(buf []byte) (int, error) {
+	now := time.Now()
+	n, err := reader.conn.Read(buf)
+	reader.time += time.Now().Sub(now)
+	return n, err
 }
 
 func (reader *httpReader) loadNext(count int) error {
@@ -144,7 +152,7 @@ func (reader *httpReader) loadNext(count int) error {
 	if reader.data == nil {
 		reader.data = make([]byte, 0)
 	}
-	n, err := reader.conn.Read(buf)
+	n, err := reader.readBuf(buf)
 	if err != nil {
 		return err
 	}
@@ -161,7 +169,7 @@ func (reader *httpReader) loadWhile(count int) error {
 	}
 	ost := count
 	for {
-		n, err := reader.conn.Read(buf[shift:])
+		n, err := reader.readBuf(buf[shift:])
 		if err != nil && n != ost {
 			return err
 		}

@@ -38,7 +38,7 @@ func (request *Request) Send(ctx context.Context, conn net.Conn) (response *Resp
 
 func ReadRequest(ctx context.Context, conn net.Conn, timeout time.Duration) (result *Request, err error) {
 	result = &Request{remoteAddr: conn.RemoteAddr()}
-	head, headers, body, err := requestReader(ctx, conn, timeout)
+	head, headers, body, time, err := requestReader(ctx, conn, timeout)
 	if err != nil {
 		return
 	}
@@ -53,6 +53,7 @@ func ReadRequest(ctx context.Context, conn net.Conn, timeout time.Duration) (res
 		result.Uri = *u
 	}
 	result.Body = body
+	result.Time = time
 	return
 }
 
