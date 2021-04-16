@@ -17,20 +17,13 @@ type httpReader struct {
 }
 
 func requestReader(ctx context.Context, conn net.Conn, timeout time.Duration) (head string, headers []string, body []byte, err error) {
-	headers = make([]string, 0, 50)
-	body, err = read(ctx, conn, timeout, func(name, value string) {
-		if name == "_HEAD_" {
-			head = value
-			return
-		}
-		headers = append(headers, name)
-		headers = append(headers, value)
-	})
-	return head, headers, body, err
+	return read(ctx, conn, timeout)
 }
 
-func read(ctx context.Context, conn net.Conn, timeout time.Duration, headersHandler func(name, value string)) ([]byte, error) {
+func read(ctx context.Context, conn net.Conn, timeout time.Duration) (string, []string, []byte, error) {
 	reader := &httpReader{conn: conn}
+	head := ""
+	headers := make([]string, 0, 50)
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	conn.SetReadDeadline(time.Now().Add(timeout))
@@ -45,13 +38,13 @@ loop:
 	for {
 		select {
 		case <-ctx.Done():
-			return nil, errors.New("Canceled")
+			return "", nil, nil, errors.New("Canceled")
 		default:
 			line := reader.readLine()
 			if line == nil {
 				err = reader.loadNext(1024)
 				if err != nil {
-					return nil, err
+					return "", nil, nil, err
 				}
 				continue
 			}
@@ -65,7 +58,7 @@ loop:
 				s := string(line)
 				if firstLine {
 					firstLine = false
-					headersHandler("_HEAD_", s)
+					head = s
 					continue
 				}
 				index := strings.Index(s, ":")
@@ -85,7 +78,8 @@ loop:
 							trailerHeaders[i] = strings.TrimSpace(s[i])
 						}
 					}
-					headersHandler(name, value)
+					headers = append(headers, name)
+					headers = append(headers, value)
 					continue
 				}
 			} else {
@@ -96,7 +90,7 @@ loop:
 					// 	log.Println("EOF:", "Readed done", contentLength)
 					// }
 					if err != nil {
-						return nil, err
+						return "", nil, nil, err
 					}
 					body.Write(data)
 				} else if contentLength == -1 {
@@ -124,12 +118,12 @@ loop:
 						// headersHandler("content-length", strconv.Itoa(body.Len()))
 						break loop
 					} else if a == 0 && len(trailerHeaders) > 0 {
-						return nil, errors.New("Not implemented trailer headers")
+						return "", nil, nil, errors.New("Not implemented trailer headers")
 					}
 
 					data, err := reader.read(a + 2)
 					if err != nil {
-						return nil, err
+						return "", nil, nil, err
 					}
 					body.Write(data[:a])
 					continue
@@ -140,9 +134,9 @@ loop:
 	}
 
 	if body != nil {
-		return body.Bytes(), nil
+		return head, headers, body.Bytes(), nil
 	}
-	return nil, nil
+	return head, headers, nil, nil
 }
 
 func (reader *httpReader) loadNext(count int) error {
