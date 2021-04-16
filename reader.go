@@ -17,7 +17,7 @@ type httpReader struct {
 }
 
 func requestReader(ctx context.Context, conn net.Conn, timeout time.Duration) (head string, headers []string, body []byte, err error) {
-	headers = make([]string, 0)
+	headers = make([]string, 0, 50)
 	body, err = read(ctx, conn, timeout, func(name, value string) {
 		if name == "_HEAD_" {
 			head = value
