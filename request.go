@@ -116,6 +116,10 @@ func (request *Request) GetHeader(name string) string {
 	return ""
 }
 
+func (request *Request) GetMethod() HttpMethod {
+	return request.method
+}
+
 func (request *Request) GetRemoteAddr() string {
 	if a := request.GetHeader("x-real-ip"); a != "" {
 		return a
