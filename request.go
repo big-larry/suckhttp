@@ -116,6 +116,33 @@ func (request *Request) GetHeader(name string) string {
 	return ""
 }
 
+func (request *Request) GetCookies() map[string]string {
+	cookie := request.GetHeader(Cookie)
+	if cookie == "" {
+		return nil
+	}
+	cookies := strings.Split(cookie, ";")
+	result := make(map[string]string, len(cookies))
+	for _, c := range cookies {
+		d := strings.Split(c, "=")
+		if len(d) != 2 {
+			continue
+		}
+		k := strings.TrimSpace(d[0])
+		result[k] = strings.TrimSpace(d[1])
+	}
+	return result
+}
+
+func (request *Request) GetCookie(name string) (string, bool) {
+	cookies := request.GetCookies()
+	if len(cookies) == 0 {
+		return "", false
+	}
+	v, ok := cookies[name]
+	return v, ok
+}
+
 func (request *Request) GetMethod() HttpMethod {
 	return request.method
 }
