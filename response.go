@@ -42,10 +42,13 @@ func ReadResponse(ctx context.Context, conn net.Conn, timeout time.Duration) (re
 		return
 	}
 	response = &Response{Time: time}
-	s := strings.Split(head, " ")
-	response.statusCode, err = strconv.Atoi(s[1])
-	if len(s) > 2 {
-		response.statusText = s[2]
+	pos1 := strings.Index(head, " ")
+	space_pos := strings.Index(head[pos1+1:], " ")
+	if space_pos == -1 {
+		response.statusCode, err = strconv.Atoi(strings.TrimSpace(head[pos1+1:]))
+	} else {
+		response.statusCode, err = strconv.Atoi(head[pos1+1 : pos1+1+space_pos])
+		response.statusText = strings.TrimSpace(head[pos1+space_pos+2:])
 	}
 	response.headers = headers
 	// enc := response.GetHeader(Content_Encoding)
