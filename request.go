@@ -154,6 +154,14 @@ func (request *Request) GetRemoteAddr() string {
 	return request.remoteAddr.String()
 }
 
+func (request *Request) Bytes() []byte {
+	message, err := CreateRequestMessage(request.method, request.Uri.RequestURI(), request.headers, request.Body)
+	if err != nil {
+		return nil
+	}
+	return message
+}
+
 func (request *Request) String() string {
 	message, err := CreateRequestMessage(request.method, request.Uri.RequestURI(), request.headers, request.Body)
 	if err != nil {

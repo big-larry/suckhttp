@@ -126,6 +126,13 @@ func (response *Response) GetHeaderValues(name string) []string {
 func (response *Response) GetBody() []byte {
 	return response.body
 }
+func (response *Response) Bytes() []byte {
+	message, err := CreateResponseMessage(response.statusCode, response.statusText, response.headers, response.body)
+	if err != nil {
+		return nil
+	}
+	return message
+}
 func (response *Response) String() string {
 	message, err := CreateResponseMessage(response.statusCode, response.statusText, response.headers, response.body)
 	if err != nil {
