@@ -95,7 +95,7 @@ loop:
 					}
 					body.Write(data)
 				} else if contentLength == -1 {
-					// log.Println("chunked")
+					//log.Println("chunked")
 					if len(line) == 0 {
 						continue
 					}
@@ -119,6 +119,11 @@ loop:
 						// headersHandler("content-length", strconv.Itoa(body.Len()))
 						break loop
 					} else if a == 0 && len(trailerHeaders) > 0 {
+						// fmt.Println(trailerHeaders)
+						// fmt.Println(headers)
+						reader.readLine() //TODO: Hack for ozon
+						// headersHandler("content-length", strconv.Itoa(body.Len()))
+						break loop
 						return "", nil, nil, reader.time, errors.New("Not implemented trailer headers")
 					}
 
