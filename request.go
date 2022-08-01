@@ -71,6 +71,17 @@ func NewRequest(method HttpMethod, uri string) (*Request, error) {
 	return &Request{method: method, Uri: *u, timeout: time.Minute, headers: headers}, nil
 }
 
+func NewRequestWithTimeout(method HttpMethod, uri string, timeout time.Duration) (*Request, error) {
+	u, err := url.Parse(uri)
+	if err != nil {
+		return nil, err
+	}
+	headers := make([]string, 0, 2)
+	if u.Hostname() != "" {
+		headers = append(headers, []string{"host", u.Hostname()}...)
+	}
+	return &Request{method: method, Uri: *u, timeout: timeout, headers: headers}, nil
+}
 func (request *Request) AddHeader(key, value string) *Request {
 	if request.headers == nil {
 		request.headers = make([]string, 0)
