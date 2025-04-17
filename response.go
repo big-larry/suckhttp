@@ -44,6 +44,7 @@ func ReadResponse(ctx context.Context, conn net.Conn, timeout time.Duration) (re
 	response = &Response{Time: time}
 	pos1 := strings.Index(head, " ")
 	space_pos := strings.Index(head[pos1+1:], " ")
+	// fmt.Println(head)
 	if space_pos == -1 {
 		response.statusCode, err = strconv.Atoi(strings.TrimSpace(head[pos1+1:]))
 	} else {
@@ -134,7 +135,7 @@ func (response *Response) Bytes() []byte {
 	return message
 }
 func (response *Response) String() string {
-	message, err := CreateResponseMessage(response.statusCode, response.statusText, response.headers, response.body)
+	message, err := CreateResponseMessage(response.statusCode, response.statusText, response.headers, []byte(strconv.Itoa(len(response.body))))
 	if err != nil {
 		return ""
 	}

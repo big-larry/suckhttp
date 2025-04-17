@@ -33,10 +33,19 @@ func createMessage(head string, headers []string, body []byte) (result []byte, e
 	}
 	if len(body) > 0 {
 		message.WriteString(suckutils.ConcatFour(Content_Length, ": ", strconv.Itoa(len(body)), "\r\n\r\n"))
+	} else {
+		message.WriteString("\r\n\r\n")
+	}
+	if len(body) > 0 {
+		// message.WriteString(suckutils.ConcatFour(Content_Length, ": ", strconv.Itoa(len(body)), "\r\n\r\n"))
+		// message.WriteString("\r\n")
 		message.Write(body)
 	} else {
-		message.WriteString("\r\n")
+		// message.WriteString("\r\n")
 	}
+	// fmt.Println("-----------------------")
+	// fmt.Println(message.String())
+	// fmt.Println("-----------------------")
 	result = message.Bytes()
 	return
 }

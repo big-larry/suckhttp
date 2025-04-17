@@ -25,9 +25,14 @@ func read(ctx context.Context, conn net.Conn, timeout time.Duration) (string, []
 	reader := &httpReader{conn: conn}
 	head := ""
 	headers := make([]string, 0, 50)
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-	conn.SetReadDeadline(time.Now().Add(timeout))
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+		conn.SetReadDeadline(time.Now().Add(timeout))
+	} else {
+		conn.SetReadDeadline(time.Time{})
+	}
 	var body *bytes.Buffer
 	contentLength := 0
 	var trailerHeaders []string

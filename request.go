@@ -25,7 +25,7 @@ func (request *Request) Send(ctx context.Context, conn net.Conn) (response *Resp
 	if err != nil {
 		return
 	}
-	//fmt.Println(string(message))
+	// fmt.Println(string(message))
 	conn.SetDeadline(time.Now().Add(request.timeout))
 	_, err = conn.Write(message)
 	if err != nil {
