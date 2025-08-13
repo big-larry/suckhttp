@@ -89,6 +89,15 @@ func (request *Request) AddHeader(key, value string) *Request {
 	request.headers = append(request.headers, []string{key, value}...)
 	return request
 }
+func (request *Request) AddHeaders(values map[string]string) *Request {
+	if request.headers == nil {
+		request.headers = make([]string, 0)
+	}
+	for key, value := range values {
+		request.headers = append(request.headers, []string{key, value}...)
+	}
+	return request
+}
 
 func (request *Request) SetHeader(key, value string) *Request {
 	if request.headers == nil {
